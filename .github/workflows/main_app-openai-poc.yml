@@ -13,6 +13,22 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: .Net Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 6.0.x
+      
+      - name: Install dependencies
+        run: | 
+          dotnet restore
+      
+      - name: Build
+        run: |
+          dotnet build --configuration Release --no-restore
+
+      - name: Publish
+        run: |
+          dotnet publish --configuration Release --no-build --output ./publish_output
 
   deploy:
     runs-on: ubuntu-latest
@@ -25,13 +41,12 @@ jobs:
       - name: Download artifact from build job
         uses: actions/download-artifact@v2
         with:
-          name: python-app
+          name: .netcore-app
           path: .
           
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v2
         id: deploy-to-webapp
         with:
-          app-name: 'app-openai-poc'
-          slot-name: 'Production'
+          app-name: 'app-az400-frontend-dev'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_3CB2149F45CC481AA776EE67D7551436 }}
